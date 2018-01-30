@@ -3,17 +3,38 @@ import os
 
 class OverlayLogoOnBackground:
 	counter = 0
+	
 	def __init__(self):
 		pass
 
+	def blend_transparent(self, l_img, s_img):
+		'''This function is directly copied and referred from Mateen Ulhaq's answer in https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
+		Arguments:
+			l_img {numpy array} -- the background image
+			s_img {numpy array} -- the overlay image
+		
+		Returns:
+			numpy array -- overlayed background image with overlay image
+		'''
+		x_offset=y_offset=100
+		y1, y2 = y_offset, y_offset + s_img.shape[0]
+		x1, x2 = x_offset, x_offset + s_img.shape[1]
+
+		alpha_s = s_img[:, :, 3] / 255.0
+		alpha_l = 1.0 - alpha_s
+
+		for c in range(0, 3):
+		    l_img[y1:y2, x1:x2, c] = (alpha_s * s_img[:, :, c] +
+		                              alpha_l * l_img[y1:y2, x1:x2, c])
+
+		return l_img
+
 	def overlay(self, logo_image_path, background_image_path):
 		self.background_image = cv2.imread(background_image_path)
-		self.logo_image = cv2.imread(logo_image_path)
-		print(logo_image_path)
-		
-		# referenced from: https://www.pyimagesearch.com/2016/03/07/transparent-overlays-with-opencv/
-		# https://stackoverflow.com/questions/40895785/using-opencv-to-overlay-transparent-image-onto-another-image
-		self.overlayed_image = cv2.addWeighted(self.background_image, 1.0, self.logo_image, 0.0, 0)	
+		self.logo_image = cv2.imread(logo_image_path, -1)
+
+		# self.overlayed_image = cv2.addWeighted(self.background_image, 1.0, self.logo_image, 0.0, 0)
+		self.overlayed_images = self.blend_transparent(self.background_image, self.logo_image)
 		OverlayLogoOnBackground.counter += 1
 
 		return self.background_image
