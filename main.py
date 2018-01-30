@@ -1,9 +1,16 @@
 import cv2
 import os
 
-class OverlayLogoOnBackground:
+class ImageManipulation:
+	# todo: implement methods for image (logo) random resize, reshape, rotation, position; 
+	# 		also return its normalized coordinates so that it can be converted to VOC format
+	def __init__(self):
+		pass
+
+
+class OverlayLogoOnBackground(ImageManipulation):
 	counter = 0
-	
+
 	def __init__(self):
 		pass
 
