@@ -1,3 +1,4 @@
+import tensorflow as tf
 import cv2
 import os
 
@@ -10,13 +11,13 @@ class BackgroundImageManipulation:
 	def get_number_of_partitions(self):
 		return randint(1, 3)
 
-	def resize(self, image, d1, d2):
+	def resize_background_image(self, image, d1, d2):
 		resized_image = cv2.resize(image, (d1, d2))
+		return resized_image
 
 
 class LogoImageManipulation:
-	# todo: implement methods for image (logo) random resize, reshape, rotation, position; 
-	# 		also return its normalized coordinates so that it can be converted to VOC format
+	# todo: return normalized coordinates so that it can be converted to VOC format
 	def __init__(self):
 		pass
 
@@ -25,6 +26,13 @@ class LogoImageManipulation:
 		ratio = float(float(image.shape[0]) / float(image.shape[1]))
 		resized_image = cv2.resize(image, (random_length, int(ratio*random_length)))
 		return resized_image
+
+	def random_rotate(self, image, max_rotation_degree=30):
+		image = tf.contrib.keras.preprocessing.image.random_rotation(image, max_rotation_degree, row_axis=0, col_axis=1, channel_axis=2)
+		return image
+
+	def random_position(self, image, max_dim_1):
+		return randint(10, max_dim_1-10)
 
 
 class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation):
@@ -38,11 +46,10 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		Arguments:
 			l_img {numpy array} -- the background image
 			s_img {numpy array} -- the overlay image
-		
 		Returns:
 			numpy array -- overlayed background image with overlay image
 		'''
-		x_offset=y_offset=100
+		x_offset=y_offset=1
 		y1, y2 = y_offset, y_offset + s_img.shape[0]
 		x1, x2 = x_offset, x_offset + s_img.shape[1]
 
@@ -60,9 +67,11 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		self.logo_image = cv2.imread(logo_image_path, -1)
 
 		self.logo_image = self.random_resize(self.logo_image, max_length=300)	# random resize of logo
+		self.logo_image = self.random_rotate(self.logo_image)
+		cv2.imshow('l',  self.logo_image)
+		cv2.waitKey(0)
+		# self.logo_image = self.random_position(self.logo_image, self.background_image.shape[1] - self.logo_image.shape[1])
 
-
-		# self.overlayed_image = cv2.addWeighted(self.background_image, 1.0, self.logo_image, 0.0, 0)
 		self.overlayed_images = self.blend_transparent(self.background_image, self.logo_image)
 		OverlayLogoOnBackground.counter += 1
 
@@ -77,19 +86,27 @@ def main():
 	BACKGROUND_IMAGE_PATH = 'G:/DL/Logo_Image_Data_Augmentation/Images/background_images'
 	LOGO_IMAGE_PATH = 'G:/DL/Logo_Image_Data_Augmentation/Images/logo_images'
 	OVERLAYED_WRITE_PATH = 'G:/DL/Logo_Image_Data_Augmentation/Images/overlayed_images'
+	DIM_1 = 256
+	DIM_2 = 256
 	
 	if not os.path.exists(OVERLAYED_WRITE_PATH):
 		os.makedirs(OVERLAYED_WRITE_PATH)
 
 	background_images_list = os.listdir(BACKGROUND_IMAGE_PATH)
 	logo_images_list = os.listdir(LOGO_IMAGE_PATH)
+	NUMBER_OF_LOGOS = len(logo_images_list)
 
 	overlay_generator = OverlayLogoOnBackground()
 	
 	for background_image_file_name in background_images_list:
 		for logo_image_file_name in logo_images_list:
-			overlay_generator.overlay_and_write_to_disk(LOGO_IMAGE_PATH + os.sep + logo_image_file_name, \
-														BACKGROUND_IMAGE_PATH + os.sep + background_image_file_name, \
+			logo_image = LOGO_IMAGE_PATH + os.sep + logo_image_file_name
+			background_image = BACKGROUND_IMAGE_PATH + os.sep + background_image_file_name
+
+			# background_image = overlay_generator.resize_background_image(background_image, (DIM_1, DIM_2))
+
+			overlay_generator.overlay_and_write_to_disk(logo_image, \
+														background_image, \
 														OVERLAYED_WRITE_PATH, \
 														background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
 
