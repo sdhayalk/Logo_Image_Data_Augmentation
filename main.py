@@ -1,6 +1,6 @@
-import tensorflow as tf
 import cv2
 import os
+import random
 
 from random import randint
 
@@ -28,8 +28,27 @@ class LogoImageManipulation:
 		return resized_image
 
 	def random_rotate(self, image, max_rotation_degree=30):
-		image = tf.contrib.keras.preprocessing.image.random_rotation(image, max_rotation_degree, row_axis=0, col_axis=1, channel_axis=2)
-		return image
+		angle = randint(0, max_rotation_degree)
+
+		'''
+		this logic has been directly referred from Remi Cuingnet's answer here at: https://stackoverflow.com/questions/22041699/rotate-an-image-without-cropping-in-opencv-in-c/37347070#37347070
+		'''
+		height, width = image.shape[:2]
+		image_center = (width/2, height/2)
+
+		rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
+
+		abs_cos = abs(rotation_mat[0,0])
+		abs_sin = abs(rotation_mat[0,1])
+
+		bound_w = int(height * abs_sin + width * abs_cos)
+		bound_h = int(height * abs_cos + width * abs_sin)
+
+		rotation_mat[0, 2] += bound_w/2 - image_center[0]
+		rotation_mat[1, 2] += bound_h/2 - image_center[1]
+
+		rotated_mat = cv2.warpAffine(image, rotation_mat, (bound_w, bound_h))
+		return rotated_mat
 
 	def random_position(self, image, max_dim_1):
 		return randint(10, max_dim_1-10)
