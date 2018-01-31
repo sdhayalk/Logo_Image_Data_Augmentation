@@ -1,14 +1,33 @@
 import cv2
 import os
 
-class ImageManipulation:
+from random import randint
+
+class BackgroundImageManipulation:
+	def __init__(self):
+		pass
+
+	def get_number_of_partitions(self):
+		return randint(1, 3)
+
+	def resize(self, image, d1, d2):
+		resized_image = cv2.resize(image, (d1, d2))
+
+
+class LogoImageManipulation:
 	# todo: implement methods for image (logo) random resize, reshape, rotation, position; 
 	# 		also return its normalized coordinates so that it can be converted to VOC format
 	def __init__(self):
 		pass
 
+	def random_resize(self, image, max_length, min_length=30):
+		random_length = randint(min_length, max_length)
+		ratio = float(float(image.shape[0]) / float(image.shape[1]))
+		resized_image = cv2.resize(image, (random_length, int(ratio*random_length)))
+		return resized_image
 
-class OverlayLogoOnBackground(ImageManipulation):
+
+class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation):
 	counter = 0
 
 	def __init__(self):
@@ -40,6 +59,9 @@ class OverlayLogoOnBackground(ImageManipulation):
 		self.background_image = cv2.imread(background_image_path)
 		self.logo_image = cv2.imread(logo_image_path, -1)
 
+		self.logo_image = self.random_resize(self.logo_image, max_length=300)	# random resize of logo
+
+
 		# self.overlayed_image = cv2.addWeighted(self.background_image, 1.0, self.logo_image, 0.0, 0)
 		self.overlayed_images = self.blend_transparent(self.background_image, self.logo_image)
 		OverlayLogoOnBackground.counter += 1
@@ -70,6 +92,7 @@ def main():
 														BACKGROUND_IMAGE_PATH + os.sep + background_image_file_name, \
 														OVERLAYED_WRITE_PATH, \
 														background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
+
 
 if __name__ == '__main__':
 	main()
