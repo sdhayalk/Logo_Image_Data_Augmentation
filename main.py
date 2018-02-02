@@ -23,7 +23,7 @@ class LogoImageManipulation:
 		'''This function randomly resizes the images, in range [min_length, max_length]
 		Arguments:
 			image {numpy array} -- image to be resized
-			max_length {[type]} -- max length of the resize
+			max_length {number} -- max length of the resize
 		Keyword Arguments:
 			min_length {number} -- min length of the resize (default: {30})
 		Returns:
@@ -182,20 +182,26 @@ def main():
 
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
+	loop_counter = 0
 	for background_image_file_name in background_images_list[0:5000]:
-		background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
-		temp_number_of_logos = randint(1, 3)
+		try:
+			background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
+			temp_number_of_logos = randint(1, 3)
 
-		# for _ in range(temp_number_of_logos):
-		logo_image_file_name = random.choice(logo_images_list)
-		logo_image = cv2.imread(LOGO_IMAGE_PATH+os.sep+logo_image_file_name, -1)
+			# for _ in range(temp_number_of_logos):
+			logo_image_file_name = random.choice(logo_images_list)
+			logo_image = cv2.imread(LOGO_IMAGE_PATH+os.sep+logo_image_file_name, -1)
 
-		background_image, x_min, y_min, x_max, y_max = overlay_generator.overlay(logo_image, background_image)
+			background_image, x_min, y_min, x_max, y_max = overlay_generator.overlay(logo_image, background_image)
 
-		# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
-		overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
-		overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], x_min, y_min, x_max, y_max)
+			# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
+			overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
+			overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], x_min, y_min, x_max, y_max)
 
+			loop_counter += 1
+
+		except:
+			print('Error found at loop counter')
 
 if __name__ == '__main__':
 	main()
