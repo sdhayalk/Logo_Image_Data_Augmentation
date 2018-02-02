@@ -5,8 +5,9 @@ import random
 from random import randint
 
 class BackgroundImageManipulation:
-	def __init__(self):
-		pass
+	def __init__(self, DIM_1, DIM_2):
+		self.DIM_1 = DIM_1
+		self.DIM_2 = DIM_2
 
 	def get_number_of_partitions(self):
 		return randint(1, 3)
@@ -57,8 +58,8 @@ class LogoImageManipulation:
 class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation):
 	counter = 0
 
-	def __init__(self):
-		pass
+	def __init__(self, DIM_1, DIM_2):
+		BackgroundImageManipulation.__init__(self, DIM_1, DIM_2)
 
 	def blend_transparent(self, l_img, s_img):
 		'''This function is directly copied and referred from Mateen Ulhaq's answer in https://stackoverflow.com/questions/14063070/overlay-a-smaller-image-on-a-larger-image-python-opencv
@@ -80,7 +81,7 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		    l_img[y1:y2, x1:x2, c] = (alpha_s * s_img[:, :, c] +
 		                              alpha_l * l_img[y1:y2, x1:x2, c])
 
-		return l_img, x1, y1, x2, y2
+		return l_img, float(x1)/float(self.DIM_1), float(y1)/float(self.DIM_2), float(x2)/float(self.DIM_1), float(x2)/float(self.DIM_2)
 
 	def overlay(self, logo_image, background_image):
 		self.background_image = background_image
@@ -102,17 +103,23 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		OverlayLogoOnBackground.counter += 1
 		cv2.imwrite(write_path + os.sep + file_name, overlayed_image)
 
-	def write_label_data_to_disk(self, overlayed_image_filename, write_path, class_value, x_min, y_min, x_max, y_max):
-		
+	def write_label_data_to_disk(self, overlayed_image_file_name, write_path, class_value, x_min, y_min, x_max, y_max):
+		class_value = class_value[0:-1] 	# removing the last letter which represents the count of the same label
 
+		with open(write_path + os.sep + overlayed_image_file_name + '.txt','w') as file:	
+			file.write("{},{},{},{},{}".format(class_value, \
+											   "{0:.4f}".format(x_min), 
+											   "{0:.4f}".format(y_min),
+											   "{0:.4f}".format(x_max),
+											   "{0:.4f}".format(y_max)))
 
 
 def main():
 	BACKGROUND_IMAGE_PATH = 'G:/DL/data_logo/coco_data/train2017'
 	LOGO_IMAGE_PATH = 'G:/DL/data_logo/coco_data/logo_images'
 	OVERLAYED_WRITE_PATH = 'G:/DL/data_logo/coco_data/overlayed_images'
-	DIM_1 = 256
-	DIM_2 = 256
+	DIM_1 = 640
+	DIM_2 = 480
 	
 	if not os.path.exists(OVERLAYED_WRITE_PATH):
 		os.makedirs(OVERLAYED_WRITE_PATH)
@@ -121,20 +128,21 @@ def main():
 	logo_images_list = os.listdir(LOGO_IMAGE_PATH)
 	NUMBER_OF_LOGOS = len(logo_images_list)
 
-	overlay_generator = OverlayLogoOnBackground()
+	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	for background_image_file_name in background_images_list[0:50]:
 		background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 		temp_number_of_logos = randint(1, 3)
 
-		for _ in range(temp_number_of_logos):
-			logo_image_file_name = random.choice(logo_images_list)
-			logo_image = cv2.imread(LOGO_IMAGE_PATH+os.sep+logo_image_file_name, -1)
+		# for _ in range(temp_number_of_logos):
+		logo_image_file_name = random.choice(logo_images_list)
+		logo_image = cv2.imread(LOGO_IMAGE_PATH+os.sep+logo_image_file_name, -1)
 
-			background_image, x_min, y_min, x_max, y_max = overlay_generator.overlay(logo_image, background_image)
+		background_image, x_min, y_min, x_max, y_max = overlay_generator.overlay(logo_image, background_image)
 
-		overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
-
+		# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
+		overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
+		overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], x_min, y_min, x_max, y_max)
 
 if __name__ == '__main__':
 	main()
