@@ -1,1 +1,1 @@
-# Logo_Image_Data_Augmentation
+# Logo Image Data Augmentation
