@@ -9,13 +9,6 @@ class BackgroundImageManipulation:
 		self.DIM_1 = DIM_1
 		self.DIM_2 = DIM_2
 
-	def get_number_of_partitions(self):
-		return randint(1, 3)
-
-	def resize_background_image(self, image, d1, d2):
-		resized_image = cv2.resize(image, (d1, d2))
-		return resized_image
-
 
 class LogoImageManipulation:
 	# todo: return normalized coordinates so that it can be converted to VOC format
