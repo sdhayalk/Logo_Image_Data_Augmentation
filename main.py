@@ -6,22 +6,42 @@ from random import randint
 
 class BackgroundImageManipulation:
 	def __init__(self, DIM_1, DIM_2):
+		'''Constructor for class BackgroundImageManipulation
+		Arguments:
+			DIM_1 {number} -- dimension 1 of background image
+			DIM_2 {number} -- dimension 2 of background image
+		'''
 		self.DIM_1 = DIM_1
 		self.DIM_2 = DIM_2
 
 
 class LogoImageManipulation:
-	# todo: return normalized coordinates so that it can be converted to VOC format
 	def __init__(self):
 		pass
 
 	def random_resize(self, image, max_length, min_length=30):
+		'''This function randomly resizes the images, in range [min_length, max_length]
+		Arguments:
+			image {numpy array} -- image to be resized
+			max_length {[type]} -- max length of the resize
+		Keyword Arguments:
+			min_length {number} -- min length of the resize (default: {30})
+		Returns:
+			numpy array -- randomly resized image
+		'''
 		random_length = randint(min_length, max_length)
 		ratio = float(float(image.shape[0]) / float(image.shape[1]))
 		resized_image = cv2.resize(image, (random_length, int(ratio*random_length)))
 		return resized_image
 
 	def random_rotate(self, image, max_rotation_degree=30):
+		'''This function rotates the images randomly with degree range [-max_rotation_degree, +max_rotation_degree]
+		Arguments:
+			iamge {numpy array} -- the image to be randomly rotated
+			max_rotation_degree {numpy array} -- random rotatio limit; default=30
+		Returns:
+			numpy array -- randomly rotated image
+		'''
 		angle = randint(-max_rotation_degree, max_rotation_degree)
 
 		'''
@@ -52,6 +72,11 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 	counter = 0
 
 	def __init__(self, DIM_1, DIM_2):
+		'''Constructor
+		Arguments:
+			DIM_1 {number} -- dimension 1 of background image
+			DIM_2 {number} -- dimension 2 of background image
+		'''
 		BackgroundImageManipulation.__init__(self, DIM_1, DIM_2)
 
 	def blend_transparent(self, l_img, s_img):
@@ -77,6 +102,17 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		return l_img, float(x1)/float(self.DIM_1), float(y1)/float(self.DIM_2), float(x2)/float(self.DIM_1), float(x2)/float(self.DIM_2)
 
 	def overlay(self, logo_image, background_image):
+		'''this functions (randomly) overlays the logo image with 0 percent transparency on the background image
+		Arguments:
+			logo_image {numpy array} -- the logo image
+			background_image {numpy array} -- the background image
+		Returns:
+			numpy array -- returns background image with logo overalayes
+			x_min -- normalized min x coordinate
+			y_min -- normalized min y coordinate
+			x_max -- normalized max x coordinate
+			y_max -- normalized max y coordinate
+		'''
 		self.background_image = background_image
 		self.logo_image = logo_image
 
@@ -88,15 +124,38 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		return self.background_image, x_min, y_min, x_max, y_max
 
 	def overlay_and_write_to_disk(self, logo_image, background_image, write_path, file_name):
+		'''this functions (randomly) overlays the logo image with 0 percent transparency on the background image and writes it to disk
+		Arguments:
+			logo_image {numpy array} -- the logo image
+			background_image {numpy array} -- the background image
+			write_path {str} -- the path where to write the overlayed image
+			file_name {str} -- name of the file to be given to the overlayed image
+		'''
 		OverlayLogoOnBackground.counter += 1
 		overlayed_image, x_min, y_min, x_max, y_max = self.overlay(logo_image, background_image)
 		cv2.imwrite(write_path + os.sep + file_name, overlayed_image)
 
 	def write_image_to_disk(self, overlayed_image, write_path, file_name):
+		'''this function writes overlayed_image to disk
+		Arguments:
+			overlayed_image {numpy array} -- the overlayed image
+			write_path {str} -- the path where to write the overlayed image
+			file_name {str} -- name of the file to be given to the overlayed image
+		'''
 		OverlayLogoOnBackground.counter += 1
 		cv2.imwrite(write_path + os.sep + file_name, overlayed_image)
 
 	def write_label_data_to_disk(self, overlayed_image_file_name, write_path, class_value, x_min, y_min, x_max, y_max):
+		'''this function writes the label data to disk
+		Arguments:
+			overlayed_image_file_name {str} -- name of the overlayed image file 
+			write_path {str} -- the path where to write the overlayed image
+			class_value {str} -- class label of the logo
+			x_min {float} -- normalized min x coordinate
+			y_min {float} -- normalized min y coordinate
+			x_max {float} -- normalized max x coordinate
+			y_max {float} -- normalized max y coordinate
+		'''
 		class_value = class_value[0:-1] 	# removing the last letter which represents the count of the same label
 
 		with open(write_path + os.sep + overlayed_image_file_name + '.txt','w') as file:	
@@ -123,7 +182,7 @@ def main():
 
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
-	for background_image_file_name in background_images_list[0:50]:
+	for background_image_file_name in background_images_list[0:5000]:
 		background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 		temp_number_of_logos = randint(1, 3)
 
@@ -136,6 +195,7 @@ def main():
 		# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
 		overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
 		overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], x_min, y_min, x_max, y_max)
+
 
 if __name__ == '__main__':
 	main()
