@@ -99,7 +99,7 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		    l_img[y1:y2, x1:x2, c] = (alpha_s * s_img[:, :, c] +
 		                              alpha_l * l_img[y1:y2, x1:x2, c])
 
-		return l_img, float(x1)/float(self.DIM_1), float(y1)/float(self.DIM_2), float(x2)/float(self.DIM_1), float(x2)/float(self.DIM_2)
+		return l_img, float(x1)/float(self.DIM_1), float(y1)/float(self.DIM_2), float(x2)/float(self.DIM_1), float(y2)/float(self.DIM_2)
 
 	def overlay(self, logo_image, background_image):
 		'''this functions (randomly) overlays the logo image with 0 percent transparency on the background image
@@ -194,7 +194,7 @@ def main():
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	loop_counter = 0
-	for background_image_file_name in background_images_list[0:5000]:
+	for background_image_file_name in background_images_list[5000:10000]:
 		try:
 			background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 			temp_number_of_logos = randint(1, 3)
