@@ -145,18 +145,20 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		OverlayLogoOnBackground.counter += 1
 		cv2.imwrite(write_path + os.sep + file_name, overlayed_image)
 
-	def write_label_data_to_disk(self, overlayed_image_file_name, write_path, class_value, x_min, y_min, x_max, y_max):
+	def write_label_data_to_disk(self, overlayed_image_file_name, write_path, class_value, class_index_map, x_min, y_min, x_max, y_max):
 		'''this function writes the label data to disk
 		Arguments:
 			overlayed_image_file_name {str} -- name of the overlayed image file 
 			write_path {str} -- the path where to write the overlayed image
 			class_value {str} -- class label of the logo
+			class_index_map {dict} -- dictionary which maps class in string (key) to a numeric value (value)
 			x_min {float} -- normalized min x coordinate
 			y_min {float} -- normalized min y coordinate
 			x_max {float} -- normalized max x coordinate
 			y_max {float} -- normalized max y coordinate
 		'''
 		class_value = class_value[0:-1] 	# removing the last letter which represents the count of the same label
+		# class_index = class_index_map[class_value]
 
 		with open(write_path + os.sep + overlayed_image_file_name + '.txt','w') as file:	
 			file.write("{},{},{},{},{}".format(class_value, \
@@ -180,6 +182,15 @@ def main():
 	logo_images_list = os.listdir(LOGO_IMAGE_PATH)
 	NUMBER_OF_LOGOS = len(logo_images_list)
 
+	class_index_map = {}
+	class_index_counter = 0
+	for file_name in logo_images_list:
+		if file_name[0:-5] not in class_index_map:
+			print(file_name[0:-5])
+			class_index_map[file_name[0:-5]] = class_index_counter
+			class_index_counter += 1
+	print('class_index_map:', class_index_map)
+
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	loop_counter = 0
@@ -196,7 +207,7 @@ def main():
 
 			# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
 			overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
-			overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], x_min, y_min, x_max, y_max)
+			overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], class_index_map, x_min, y_min, x_max, y_max)
 
 			loop_counter += 1
 
