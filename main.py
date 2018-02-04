@@ -161,7 +161,8 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 		# class_index = class_index_map[class_value]
 
 		with open(write_path + os.sep + overlayed_image_file_name + '.txt','w') as file:	
-			file.write("{},{},{},{},{}".format(class_value, \
+			file.write("{},{},{},{},{}".format(overlayed_image_file_name + '.jpg', \
+											   class_value,
 											   "{0:.4f}".format(x_min), 
 											   "{0:.4f}".format(y_min),
 											   "{0:.4f}".format(x_max),
@@ -194,7 +195,7 @@ def main():
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	loop_counter = 0
-	for background_image_file_name in background_images_list[5000:10000]:
+	for background_image_file_name in background_images_list[0:10000]:
 		try:
 			background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 			temp_number_of_logos = randint(1, 3)
