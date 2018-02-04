@@ -1,6 +1,7 @@
 import cv2
 import os
 import random
+import numpy as np
 
 from random import randint
 
@@ -33,6 +34,54 @@ class LogoImageManipulation:
 		ratio = float(float(image.shape[0]) / float(image.shape[1]))
 		resized_image = cv2.resize(image, (random_length, int(ratio*random_length)))
 		return resized_image
+
+	def random_noise(self, image):
+		'''This function is direcly copied from Shubham Pachori's answer at: https://stackoverflow.com/questions/22937589/how-to-add-noise-gaussian-salt-and-pepper-etc-to-image-in-python-with-opencv
+		Arguments:
+			image {[type]} -- [description]
+		Returns:
+			[type] -- [description]
+		'''
+		noise_typ = randint(0, 4)	# 0 for adding no noise
+		if noise_typ == 1: # "gauss"
+			row,col,ch= image.shape
+			mean = 0
+			var = 0.1
+			sigma = var**0.5
+			gauss = np.random.normal(mean,sigma,(row,col,ch))
+			gauss = gauss.reshape(row,col,ch)
+			noisy = image + gauss
+			return noisy
+
+		elif noise_typ == 2: # "s&p"
+			row,col,ch = image.shape
+			s_vs_p = 0.5
+			amount = 0.004
+			out = np.copy(image)
+			# Salt mode
+			num_salt = np.ceil(amount * image.size * s_vs_p)
+			coords = [np.random.randint(0, i - 1, int(num_salt)) for i in image.shape]
+			out[coords] = 1
+
+			# Pepper mode
+			num_pepper = np.ceil(amount* image.size * (1. - s_vs_p))
+			coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in image.shape]
+			out[coords] = 0
+
+			return out
+
+		elif noise_typ == 3: # "poisson"
+			vals = len(np.unique(image))
+			vals = 2 ** np.ceil(np.log2(vals))
+			noisy = np.random.poisson(image * vals) / float(vals)
+			return noisy
+
+		elif noise_typ == 4: # "speckle"
+			row,col,ch = image.shape
+			gauss = np.random.randn(row,col,ch)
+			gauss = gauss.reshape(row,col,ch)        
+			noisy = image + image * gauss
+			return noisy
 
 	def random_rotate(self, image, max_rotation_degree=30):
 		'''This function rotates the images randomly with degree range [-max_rotation_degree, +max_rotation_degree]
@@ -118,6 +167,7 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 
 		self.logo_image = self.random_resize(self.logo_image, max_length=300)	# random resize of logo
 		self.logo_image = self.random_rotate(self.logo_image)
+		self.logo_image = self.random_noise(self.logo_image)
 
 		self.overlayed_images, x_min, y_min, x_max, y_max = self.blend_transparent(self.background_image, self.logo_image)
 
@@ -196,7 +246,7 @@ def main():
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	loop_counter = 0
-	for background_image_file_name in background_images_list[0:1000]:
+	for background_image_file_name in background_images_list[0:100]:
 		try:
 			background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 			temp_number_of_logos = randint(1, 3)
