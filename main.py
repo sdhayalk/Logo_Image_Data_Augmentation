@@ -158,11 +158,12 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 			y_max {float} -- normalized max y coordinate
 		'''
 		class_value = class_value[0:-1] 	# removing the last letter which represents the count of the same label
-		# class_index = class_index_map[class_value]
+		class_index = class_index_map[class_value]
 
 		with open(write_path + os.sep + overlayed_image_file_name + '.txt','w') as file:	
-			file.write("{},{},{},{},{}".format(overlayed_image_file_name + '.jpg', \
+			file.write("{},{},{},{},{},{},{}".format(overlayed_image_file_name + '.jpg', \
 											   class_value,
+											   str(class_index),
 											   "{0:.4f}".format(x_min), 
 											   "{0:.4f}".format(y_min),
 											   "{0:.4f}".format(x_max),
@@ -195,10 +196,12 @@ def main():
 	overlay_generator = OverlayLogoOnBackground(DIM_1, DIM_2)
 	
 	loop_counter = 0
-	for background_image_file_name in background_images_list[0:10000]:
+	for background_image_file_name in background_images_list[0:1000]:
 		try:
 			background_image = cv2.imread(BACKGROUND_IMAGE_PATH+os.sep+background_image_file_name)
 			temp_number_of_logos = randint(1, 3)
+
+			background_image = cv2.resize(background_image, (DIM_1, DIM_2))
 
 			# for _ in range(temp_number_of_logos):
 			logo_image_file_name = random.choice(logo_images_list)
