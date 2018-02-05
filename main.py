@@ -56,7 +56,7 @@ class LogoImageManipulation:
 		elif noise_typ == 2: # "s&p"
 			row,col,ch = image.shape
 			s_vs_p = 0.5
-			amount = 0.004
+			amount = 0.001
 			out = np.copy(image)
 			# Salt mode
 			num_salt = np.ceil(amount * image.size * s_vs_p)
@@ -219,6 +219,15 @@ class OverlayLogoOnBackground(BackgroundImageManipulation, LogoImageManipulation
 											   "{0:.4f}".format(x_max),
 											   "{0:.4f}".format(y_max)))
 
+	def write_image_with_bb_to_disk(self, overlayed_image, write_path, file_name, x_min, y_min, x_max, y_max):
+		x_min = int(x_min * 640)
+		y_min = int(y_min * 480)
+		x_max = int(x_max * 640)
+		y_max = int(y_max * 480)
+
+		overlayed_image = cv2.rectangle(overlayed_image, (x_min,y_min), (x_max,y_max), (0,255,0), 3)
+		cv2.imwrite(write_path + os.sep + file_name, overlayed_image)
+
 
 def main():
 	BACKGROUND_IMAGE_PATH = 'G:/DL/data_logo/coco_data/train2017'
@@ -262,7 +271,7 @@ def main():
 			# overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH, background_image_file_name[0:-4] + str(OverlayLogoOnBackground.counter) + '.jpg')
 			overlay_generator.write_image_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'Images', background_image_file_name)
 			overlay_generator.write_label_data_to_disk(background_image_file_name[0:-4], OVERLAYED_WRITE_PATH+os.sep+'Labels', logo_image_file_name[0:-4], class_index_map, x_min, y_min, x_max, y_max)
-
+			overlay_generator.write_image_with_bb_to_disk(background_image, OVERLAYED_WRITE_PATH+os.sep+'BBImages', background_image_file_name, x_min, y_min, x_max, y_max)
 			loop_counter += 1
 
 		except:
