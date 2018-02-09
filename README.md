@@ -32,5 +32,11 @@ Resultant Overlayed Label data:
 000000000092.jpg,samsung,3,0.5078,0.3688,0.7312,0.4875
 ```
 
+
+Resultant Overlayed Image with bounding box (just for reference):
+
+![Input Background Image](Readme_Images/000000000092_.jpg "<== Resultant Overlayed Image with bounding box (just for reference)")
+
+
 ### TODO:
 Add more augmentation techniques such as random shear, random lightening and color, etc.
