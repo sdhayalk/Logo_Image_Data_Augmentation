@@ -18,11 +18,19 @@ The overlay of logos is done randomly, with random selection of logos, random po
 ## Sample input and outputs:
 
 Input Background Image:
+
 ![Input Background Image](Readme_Images/000000000092.jpg "<== Input Background Image")
 
+
 Resultant Overlayed Image:
+
 ![Input Background Image](Readme_Images/000000000092overlayed.jpg "<== Resultant Overlayed Image")
 
+
+Resultant Overlayed Label data:
+```
+000000000092.jpg,samsung,3,0.5078,0.3688,0.7312,0.4875
+```
 
 ### TODO:
 Add more augmentation techniques such as random shear, random lightening and color, etc.
