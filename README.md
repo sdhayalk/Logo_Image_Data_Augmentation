@@ -15,5 +15,9 @@ The overlay of logos is done randomly, with random selection of logos, random po
 7) normalized max y coordinate
 ```
 
+## Sample input and outputs:
+
+![Input Background Image](Readme_Images/000000000092.jpg "<== Input Background Image")<== Input Background Image
+
 ### TODO:
 Add more augmentation techniques such as random shear, random lightening and color, etc.
